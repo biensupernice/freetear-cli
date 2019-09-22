@@ -1,0 +1,4 @@
+{
+    "RABBIT_MQ_CONNECTION_URL": "",
+    "MONGODB_CONNECTION_URL": ""
+}
