@@ -33,7 +33,7 @@ module.exports = (() => async () => {
 
 
   const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       args: ["--incognito"]
   });
 
