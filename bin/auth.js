@@ -1,6 +1,12 @@
 #! /usr/bin/env node
 var puppeteer = require('puppeteer');
 var inquirer = require('inquirer');
+var dockerNames = require('docker-names')
+const editJsonFile = require("edit-json-file");
+
+let file = editJsonFile(`${__dirname}/credientials.json`);
+
+dockerNames.surnames = Array('tear', 'tears')
 
 let getCurrentTime = () => {
     let toDigit = (number) => {
@@ -27,7 +33,7 @@ let getCurrentTime = () => {
 
 
         const browser = await puppeteer.launch({
-            headless: false,
+            headless: true,
             args: ["--incognito"]
         });
 
@@ -81,10 +87,11 @@ let getCurrentTime = () => {
             console.log(`[X] ${getCurrentTime()} Creating queue instance`);
         }
         
-        const page_confirmation_selector = '#wizardNext'
+        const page_confirmation_selector = '#wizardNext';
+        const application_deployment_name = 'tear-' + dockerNames.getRandomName();
 
         await page.waitForSelector(instances_name_selector)
-        await page.type(instances_name_selector, 'freeTier')
+        await page.type(instances_name_selector, application_deployment_name)
 
         await page.click(page_confirmation_selector)
 
@@ -101,7 +108,6 @@ let getCurrentTime = () => {
             }])
         
         const region_selector = `#region > [label="${host.host}"] > option:enabled`;
-        console.log(region_selector)
 
         async function getValue(selector) {
             let value = await page.evaluate((sel) => {
@@ -111,11 +117,17 @@ let getCurrentTime = () => {
             }, selector)
             return value
         }
+        async function setValue(selector, host, region) {
+            let value = await page.evaluate((sel) => {
+                return document.querySelector(sel[0]).value = `${sel[1].host.toLocaleLowerCase().split(' ').join('-')}::${sel[2].region.split(' ')[0].toLowerCase()}`
+            }, [selector, host, region]);
+            return value;
+        }
+
         await page.waitFor(500);
         
         let selections = await getValue(region_selector);
         
-        console.log(selections)
         const region = await inquirer.prompt([
             {
               type: 'list',
@@ -124,8 +136,49 @@ let getCurrentTime = () => {
               choices: selections
             }])
 
-        console.log(region);
+        const selection = await setValue('select', host, region);
+        
+        if (typeof selection === 'undefined') {
+            console.error(`[X] ${getCurrentTime()} Failed to select region`);
+            process.exit();
+        }
+        if (selection && selection !== `${host.host.toLocaleLowerCase().split(' ').join('-')}::${region.region.split(' ')[0].toLowerCase()}` ) {
+            console.error(`[X] ${getCurrentTime()} Failed to set region`);
+            process.exit();
+        }
 
+        console.log(`[X] ${getCurrentTime()} Region is set to ${region.region}`);
 
+        await page.click(page_confirmation_selector);
+        
+        await page.waitFor(500);
+
+        await page.click(page_confirmation_selector);
+
+        console.log(`[X] ${getCurrentTime()} Successfully created`);
+
+        const crediential_selector = `[data-value="${application_deployment_name}"]`;
+
+        await page.waitFor(250);
+        await page.click(crediential_selector);
+        
+        console.log(`[X] ${getCurrentTime()} Acquiring credientials`);
+
+        var amqp_selector = '//td[text()="AMQP URL"]';
+        await page.waitFor(250);
+        let credientials = await page.evaluate((sel) => {
+            console.log(sel)
+            var result = document.evaluate(sel, document, null, XPathResult.ANY_TYPE, null );
+            var element = result.iterateNext();
+            var crediental = element.nextSibling.nextSibling;
+            var hidden = crediental.children[0];
+            hidden.click();
+
+            return element.nextSibling.nextSibling.textContent;
+        }, amqp_selector)
+
+        file.set("RABBIT_MQ_CONNECTION_URL", credientials);
+        file.save();
+        process.exit(0);
     }
 )();
