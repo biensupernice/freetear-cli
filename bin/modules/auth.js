@@ -33,7 +33,7 @@ module.exports = (() => async () => {
 
 
   const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       args: ["--incognito"]
   });
 
@@ -142,6 +142,11 @@ module.exports = (() => async () => {
         choices: selections
       }])
 
+  if (host.host === 'Azure'){
+      host.host = 'Azure Arm'
+      region.region = region.region.replace(' ', '')
+  }
+  
   const selection = await setValue('select', host, region);
   
   if (typeof selection === 'undefined') {
@@ -165,13 +170,13 @@ module.exports = (() => async () => {
 
   const crediential_selector = `[data-value="${application_deployment_name}"]`;
 
-  await page.waitFor(250);
+  await page.waitFor(500);
   await page.click(crediential_selector);
   
   console.log(`[X] ${getCurrentTime()} Acquiring credientials`);
 
   var amqp_selector = '//td[text()="AMQP URL"]';
-  await page.waitFor(250);
+  await page.waitFor(500);
   let credientials = await page.evaluate((sel) => {
       console.log(sel)
       var result = document.evaluate(sel, document, null, XPathResult.ANY_TYPE, null );
