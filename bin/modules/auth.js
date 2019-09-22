@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 var puppeteer = require('puppeteer');
 var inquirer = require('inquirer');
-var dockerNames = require('docker-names')
+var dockerNames = require('docker-names');
 const editJsonFile = require("edit-json-file");
 
 let file = editJsonFile(`${__dirname}/credientials.json`);
