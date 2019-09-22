@@ -1,26 +1,10 @@
-const shell = require("shelljs");
 const program = require('commander');
+const { deploy } = require('./modules/zeit');
 
 program
-  .option('-n, --name', 'Name of ')
+  .option('-n, --name', 'Name of deployment service')
   .parse(process.argv);
 
-var pkgs = program.args;
+const { args } = program;
 
-if (!pkgs.length) {
-  console.error('packages required');
-  process.exit(1);
-}
-
-console.log();
-if (program.force) console.log('  force: install');
-pkgs.forEach(function(pkg){
-  console.log('  install : %s', pkg);
-});
-console.log();
-
-if (true) {
-  let info = 'publish';
-  console.log(info)
-}
-// shell.exec("now");
+deploy(args[0]);
