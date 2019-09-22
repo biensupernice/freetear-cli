@@ -16,13 +16,12 @@ exports.list = () => {
       .filter(row => row.length)
       .map((r,i) => `${i+1}) ${r[0]}`).join('\n');
     console.log(boxen(services, { padding: 1}));
-    // services.slice(1);
   });
   spinner.stop();
 }
 
-exports.secrets = (key, value) =>
-  console.log('Need to update now-secrets and now config with ${key}:${value}');
+exports.secrets = (slug, value) =>
+  shell.exec(`now secrets add ${slug} "${value}"`);
 
 
 exports.logs = svc => {
