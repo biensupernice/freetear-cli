@@ -21,4 +21,4 @@ def rabbit_consume():
         return 'no info', 200
     else:            
         channel.basic_ack(delivery_tag=method_frame.delivery_tag) 
-        return jsonify(body), 200
+        return jsonify(body.decode("utf-8")), 200

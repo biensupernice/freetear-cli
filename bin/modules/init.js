@@ -42,6 +42,7 @@ module.exports = (() => async () => {
         if (services['resource'].length > 1) {
             shell.exec(`awk 'FNR==1{print ""}1' ./bin/templates/boilerplate/python/routes/* > index.py`)
             shell.exec(`awk 'FNR==1{print ""}1' ./bin/templates/boilerplate/python/requirements/* > requirements.txt`)
+            shell.exec('rm -r connections')
             shell.exec('mkdir connections')
             shell.exec(`cp -r ./bin/templates/boilerplate/python/connections/ ./connections/`)
         }
@@ -49,12 +50,14 @@ module.exports = (() => async () => {
             if (services['resource'] == 'Message Broker Service') {
                 shell.exec(`awk 'FNR==1{print ""}1' ./bin/templates/boilerplate/python/routes/flask.py ./bin/templates/boilerplate/python/routes/rabbit.py > index.py`)
                 shell.exec(`awk 'FNR==1{print ""}1' ./bin/templates/boilerplate/python/requirements/flask.txt ./bin/templates/boilerplate/python/requirements/rabbit.txt > requirements.txt`)
+                shell.exec('rm -r connections')
                 shell.exec('mkdir connections')
                 shell.exec(`cp ./bin/templates/boilerplate/python/connections/__init__.py ./connections/`)
                 shell.exec(`cp ./bin/templates/boilerplate/python/connections/rabbit.py ./connections/`)
             } else {
                 shell.exec(`awk 'FNR==1{print ""}1' ./bin/templates/boilerplate/python/routes/flask.py ./bin/templates/boilerplate/python/routes/mongo.py > index.py`)
                 shell.exec(`awk 'FNR==1{print ""}1' ./bin/templates/boilerplate/python/requirements/flask.txt ./bin/templates/boilerplate/python/requirements/mongo.txt > requirements.txt`)
+                shell.exec('rm -r connections')
                 shell.exec('mkdir connections')
                 shell.exec(`cp ./bin/templates/boilerplate/python/connections/__init__.py ./connections/`)
                 shell.exec(`cp ./bin/templates/boilerplate/python/connections/mongo.py ./connections/`)
@@ -62,11 +65,13 @@ module.exports = (() => async () => {
         } else {
             shell.exec(`awk 'FNR==1{print ""}1' ./bin/templates/boilerplate/python/routes/flask.py > index.py`)
             shell.exec(`awk 'FNR==1{print ""}1' ./bin/templates/boilerplate/python/requirements/flask.txt > requirements.txt`)
+            shell.exec('rm -r connections')
             shell.exec('mkdir connections')
             shell.exec(`cp ./bin/templates/boilerplate/python/connections/__init__.py ./connections/`)
         }
 
         shell.exec(`cp ./bin/templates/credientials.json .`)
+        shell.exec(`cp ./bin/templates/now.json .`)
         
     }
 
